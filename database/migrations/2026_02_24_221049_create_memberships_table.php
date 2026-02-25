@@ -14,8 +14,8 @@ return new class extends Migration
     {
         Schema::create('memberships', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('colocation_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('colocation_id')->constrained('colocations')->onDelete('cascade');
             $table->enum('role', ['owner', 'user'])->default('user');
             $table->timestamp('joined_at')->nullable();
             $table->timestamp('left_at')->nullable();

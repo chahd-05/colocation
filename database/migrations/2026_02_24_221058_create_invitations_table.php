@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('invitations', function (Blueprint $table) {
             $table->id();
             $table->string('email')->nullable();
-            $table->foreignId('colocation_id')->constrained()->onDelete('cascade');
+            $table->foreignId('colocation_id')->constrained('colocations')->onDelete('cascade');
             $table->string('token')->unique();
             $table->timestamp('expires_at')->nullable();
             $table->timestamp('accepted_at')->nullable();

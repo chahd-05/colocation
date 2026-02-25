@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('colocations', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->boolean('status')->default(false);
-            $table->foreignId('owner_id')->constrained()->onDelete('cascade');
-            $table->timestamps();
+        
+    Schema::create('colocations', function (Blueprint $table) {
+        $table->id();
+        $table->string('name');
+        $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
+        $table->enum('status', ['active', 'cancelled'])->default('active');
+        $table->timestamps();
         });
     }
 
