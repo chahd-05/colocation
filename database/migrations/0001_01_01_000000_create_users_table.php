@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('password');
             $table->enum('role', ['admin', 'user'])->default('user');            
             $table->boolean('is_banned')->default(false);
-            $table->integer('reputation');
+            $table->integer('reputation')->default(0);
             $table->rememberToken();
             $table->timestamps();
         });
