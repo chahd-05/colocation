@@ -14,13 +14,11 @@ use Illuminate\Support\Facades\DB;
 
 class ColocationController extends Controller
 {
-    public function create()
-    {
+    public function create() {
         return view('colocations.create');
     }
 
-    public function store(Request $request)
-    {
+    public function store(Request $request) {
         $request->validate([
             'name' => 'required|string|max:255',
         ]);
@@ -63,10 +61,9 @@ class ColocationController extends Controller
         });
 
         return redirect()->route('colocations.show', $colocation);
-    }
+}
 
-    public function show(Request $request, Colocation $colocation)
-    {
+    public function show(Request $request, Colocation $colocation) {
         $this->authorizeMemberOrAdmin($colocation);
 
         $month = $request->query('month');
@@ -111,8 +108,7 @@ class ColocationController extends Controller
         ]);
     }
 
-    public function update(Request $request, Colocation $colocation)
-    {
+    public function update(Request $request, Colocation $colocation) {
         $this->authorizeOwner($colocation);
 
         $request->validate([
@@ -126,8 +122,7 @@ class ColocationController extends Controller
         return back()->with('success', 'Colocation updated.');
     }
 
-    public function leave(Colocation $colocation)
-    {
+    public function leave(Colocation $colocation) {
         $membership = $this->getActiveMembership($colocation, Auth::id());
         if (! $membership) {
             abort(403);
@@ -146,8 +141,7 @@ class ColocationController extends Controller
         return redirect()->route('dashboard')->with('success', 'You left the colocation.');
     }
 
-    public function removeMember(Colocation $colocation, Membership $membership)
-    {
+    public function removeMember(Colocation $colocation, Membership $membership) {
         $this->authorizeOwner($colocation);
 
         if ($membership->colocation_id !== $colocation->id || $membership->left_at) {
@@ -186,8 +180,7 @@ class ColocationController extends Controller
         return back()->with('success', 'Member removed.');
     }
 
-    public function cancel(Colocation $colocation)
-    {
+    public function cancel(Colocation $colocation) {
         $this->authorizeOwner($colocation);
 
         $balanceData = ColocationBalance::compute($colocation);
@@ -203,8 +196,7 @@ class ColocationController extends Controller
         return redirect()->route('dashboard')->with('success', 'Colocation cancelled.');
     }
 
-    private function authorizeMemberOrAdmin(Colocation $colocation): void
-    {
+    private function authorizeMemberOrAdmin(Colocation $colocation): void {
         if (Auth::user()->role === 'admin') {
             return;
         }
@@ -215,25 +207,21 @@ class ColocationController extends Controller
         }
     }
 
-    private function authorizeOwner(Colocation $colocation): void
-    {
+    private function authorizeOwner(Colocation $colocation): void {
         if ($colocation->owner_id !== Auth::id()) {
             abort(403);
         }
     }
 
-    private function getActiveMembership(Colocation $colocation, int $userId): ?Membership
-    {
+    private function getActiveMembership(Colocation $colocation, int $userId): ?Membership {
         return $colocation->activeMemberships()->where('user_id', $userId)->first();
     }
 
-    private function isOwner(Colocation $colocation): bool
-    {
+    private function isOwner(Colocation $colocation): bool {
         return $colocation->owner_id === Auth::id();
     }
 
-    private function applyReputationOnExit(Colocation $colocation, int $userId): void
-    {
+    private function applyReputationOnExit(Colocation $colocation, int $userId): void {
         $balanceData = ColocationBalance::compute($colocation);
         $balance = $balanceData['members'][$userId]['balance'] ?? 0;
 
