@@ -2,14 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\ColocationInvitationMail;
 use App\Models\Colocation;
 use App\Models\Invitation;
 use App\Models\Membership;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 
 class InvitationController extends Controller
@@ -23,29 +20,16 @@ class InvitationController extends Controller
         ]);
 
         $invitation = Invitation::create([
-            'email' => $request->email,
             'colocation_id' => $colocation->id,
-            'token' => Str::random(60),
-            'expires_at' => now()->addDays(3),
+            'created_by' => Auth::id(),
+            'token' => Str::random(20),
+            'email' => $request->email,
+            'status' => 'pendding',
         ]);
 
-        $acceptUrl = URL::temporarySignedRoute(
-            'invitations.accept',
-            $invitation->expires_at,
-            ['token' => $invitation->token]
-        );
+        $url = url('/invitations/' . $invitation->token);
 
-        $refuseUrl = URL::temporarySignedRoute(
-            'invitations.refuse',
-            $invitation->expires_at,
-            ['token' => $invitation->token]
-        );
-
-        Mail::to($request->email)->queue(
-            new ColocationInvitationMail($colocation, $acceptUrl, $refuseUrl, $invitation->expires_at)
-        );
-
-        return back()->with('success', 'Invitation sent.');
+        return redirect()->back()->with('link', $url);
     }
 
     public function accept(string $token)
@@ -84,6 +68,7 @@ class InvitationController extends Controller
 
         $invitation->update([
             'accepted_at' => now(),
+            'status' => 'accepted',
         ]);
 
         return redirect()->route('colocations.show', $invitation->colocation_id);
@@ -96,6 +81,7 @@ class InvitationController extends Controller
         if (! $invitation->accepted_at && ! $invitation->refused_at) {
             $invitation->update([
                 'refused_at' => now(),
+                'status' => 'refused',
             ]);
         }
 
